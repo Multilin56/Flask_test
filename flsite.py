@@ -1,6 +1,7 @@
 import sqlite3
 import os
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, g, flash, abort
+from FDataBase import FDataBase
 
 DATABASE = '/tmp/flsite.db'
 DEBUG = True
@@ -30,17 +31,18 @@ def get_db():
         g.link_db = connect_db()
     return g.link_db
 
-
-@app.route("/")
-def index():
-    db = get_db()
-    return render_template('index.html', menu = [])
-
 @app.teardown_appcontext
 def close_db(error):
     '''Закрываем соединение с БД, если оно было установлено'''
     if hasattr(g, 'link_db'):
         g.link_db.close()
+
+
+@app.route("/")
+def index():
+    db = get_db()
+    dbase = FDataBase(db)
+    return render_template('index.html', menu = dbase.getMenu())
 
 if __name__ == "__main__":
     app.run(debug=True)
