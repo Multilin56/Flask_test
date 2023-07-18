@@ -1,58 +1,31 @@
-from flask import Flask, render_template, make_response, redirect, url_for
+from flask import Flask, render_template, make_response, url_for, request, session
+import datetime
 
 app = Flask(__name__)
-
-menu = [{"title": "Главная", "url": "/"},
-        {"title": "Добавить статью", "url": "/add_post"}]
+app.config['SECRET_KEY'] = '445a94fce62bb8b80c8fb47224099e163ad6080d'
+app.permanent_session_lifetime = datetime.timedelta(days=10)
 
 @app.route("/")
 def index():
-    # content = render_template('index.html', menu=menu, posts=[])
-    # res = make_response(content)
-    # res.headers['Content-Type'] = 'text/plain'
-    # res.headers['Server'] = 'flasksite'
-    # return res
-
-    # img = None
-    # with app.open_resource( app.root_path + "/static/images/ava.png", mode="rb") as f:
-    #     img = f.read()
-    #
-    # if img is None:
-    #     return "None image"
-    #
-    # res = make_response(img)
-    # res.headers['Content-Type'] = 'image/png'
-    # return res
-
-    res = make_response("<h1>Ошибка сервера</h1>", 500)
-    return res
-
-@app.errorhandler(404)
-def pageNot(error):
-    return ("Страница не найдена", 404)
-
-@app.route('/transfer')
-def transfer():
-    return redirect(url_for('index'), 301)
+    if 'visits' in session:
+        session['visits'] = session.get('visits') + 1  # обновление данных сессии
+    else:
+        session['visits'] = 1   # запись данных в сессию
+    return f"<h1>Main Page</h1><p>Число просмотров: {session['visits']}"
 
 
-# @app.before_first_request
-# def before_first_request():
-#     print("before_first_request() called")
+data = [1,2,3,4]
+@app.route("/session")
+def session_data():
+    session.permanent = True
+    if 'data' not in session:
+        session['data'] = data
+    else:
+        session['data'][1] += 1
+        session.modified = True
 
-@app.before_request
-def before_request():
-    print("before_request() called")
+    return f"<p>session['data']:  {session['data']}"
 
-@app.after_request
-def after_request(response):
-    print("after_request() called")
-    return response
-
-@app.teardown_request
-def teardown_request(response):
-    print("teardown_request() called")
-    return response
 
 if __name__ == '__main__':
     app.run(debug=True)
