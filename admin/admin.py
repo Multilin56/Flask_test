@@ -27,6 +27,7 @@ def login():
         return redirect(url_for('.index'))
 
     if request.method == "POST":
+        print('lflff')
         if request.form['user'] == "admin" and request.form['psw'] == '12345':
             login_admin()
             return redirect(url_for('.index'))
